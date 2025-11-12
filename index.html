@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #111;
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .header {
+            background: #000;
+            padding: 40px;
+            border-bottom: 2px solid #00ff41;
+        }
+
+        .invoice-title {
+            font-size: 14px;
+            color: #00ff41;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .invoice-number {
+            font-size: 32px;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .from-to-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+            border-bottom: 1px solid #222;
+        }
+
+        .section-label {
+            color: #00ff41;
+            font-size: 12px;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .company-name {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .detail-line {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .items-section {
+            padding: 40px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .items-table thead {
+            border-bottom: 2px solid #00ff41;
+        }
+
+        .items-table th {
+            text-align: left;
+            padding: 15px 10px;
+            color: #00ff41;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .items-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #222;
+            color: #e0e0e0;
+        }
+
+        .items-table .desc {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .totals {
+            margin-left: auto;
+            width: 300px;
+            border-top: 2px solid #222;
+            padding-top: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        .total-row.final {
+            border-top: 2px solid #00ff41;
+            margin-top: 10px;
+            padding-top: 20px;
+            font-size: 18px;
+            color: #00ff41;
+            font-weight: bold;
+        }
+
+        .footer {
+            padding: 40px;
+            border-top: 1px solid #222;
+            background: #0a0a0a;
+        }
+
+        .payment-info {
+            margin-bottom: 30px;
+        }
+
+        .payment-label {
+            color: #00ff41;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .payment-detail {
+            color: #888;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .notes {
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .editable {
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            width: 100%;
+            outline: none;
+            border-bottom: 1px dashed transparent;
+        }
+
+        .editable:focus {
+            border-bottom: 1px dashed #00ff41;
+        }
+
+        .remove-btn {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 18px;
+            width: 25px;
+            height: 25px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .remove-btn:hover {
+            background: #ff4444;
+            color: #000;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 8px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #00ff41;
+            color: #000;
+        }
+
+        .btn-secondary {
+            border-color: #0088ff;
+            color: #0088ff;
+        }
+
+        .btn-secondary:hover {
+            background: #0088ff;
+            color: #000;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                border: none;
+                box-shadow: none;
+            }
+
+            .action-buttons,
+            .btn,
+            .remove-btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="invoice-title">INVOICE</div>
+            <div class="invoice-number">#<input class="editable" id="invoiceNum" value="INV-2024-001"
+                    style="width: 200px; font-size: 32px; font-weight: bold;"></div>
+            <div class="detail-line">Date: <input class="editable" id="invoiceDate" value="November 13, 2024"
+                    style="width: 150px;"></div>
+            <div class="detail-line">Due: <input class="editable" id="invoiceDue" value="December 13, 2024"
+                    style="width: 150px;"></div>
+        </div>
+
+        <div class="from-to-section">
+            <div>
+                <div class="section-label">FROM</div>
+                <div class="company-name"><input class="editable" id="fromName" value="Your Name"
+                        style="font-size: 18px; font-weight: bold;"></div>
+                <div class="detail-line"><input class="editable" id="fromTitle" value="Software Developer"></div>
+                <div class="detail-line"><input class="editable" id="fromEmail" value="your.email@example.com"></div>
+                <div class="detail-line"><input class="editable" id="fromPhone" value="+1 (555) 123-4567"></div>
+                <div class="detail-line"><input class="editable" id="fromAddress" value="City, Country"></div>
+            </div>
+            <div>
+                <div class="section-label">TO</div>
+                <div class="company-name"><input class="editable" id="toCompany" value="Client Company Name"
+                        style="font-size: 18px; font-weight: bold;"></div>
+                <div class="detail-line"><input class="editable" id="toName" value="Client Name"></div>
+                <div class="detail-line"><input class="editable" id="toEmail" value="client@company.com"></div>
+                <div class="detail-line"><input class="editable" id="toPhone" value="+1 (555) 987-6543"></div>
+                <div class="detail-line"><input class="editable" id="toAddress" value="City, Country"></div>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <div class="action-buttons">
+                <button onclick="addItem()" class="btn">+ ADD ITEM</button>
+                <button onclick="saveInvoice()" class="btn btn-secondary">💾 SAVE HTML</button>
+                <button onclick="downloadPDF()" class="btn btn-secondary">📄 DOWNLOAD PDF</button>
+            </div>
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>DESCRIPTION</th>
+                        <th class="text-right" style="width: 80px;">QTY</th>
+                        <th class="text-right" style="width: 120px;">RATE</th>
+                        <th class="text-right" style="width: 120px;">AMOUNT</th>
+                        <th style="width: 40px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody">
+                    <tr>
+                        <td>
+                            <div><input class="editable" value="Web Application Development" onblur="calculateTotal()">
+                            </div>
+                            <div class="desc"><input class="editable"
+                                    value="Full-stack development with React & Node.js"></div>
+                        </td>
+                        <td class="text-right"><input class="editable text-right qty" value="40" style="width: 60px;"
+                                onblur="calculateTotal()"></td>
+                        <td class="text-right"><input class="editable text-right rate" value="120.00"
+                                style="width: 100px;" onblur="calculateTotal()"></td>
+                        <td class="text-right amount">$4,800.00</td>
+                        <td class="text-right"><button onclick="removeItem(this)" class="remove-btn">×</button></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div><input class="editable" value="API Integration" onblur="calculateTotal()"></div>
+                            <div class="desc"><input class="editable" value="Third-party service integration & testing">
+                            </div>
+                        </td>
+                        <td class="text-right"><input class="editable text-right qty" value="15" style="width: 60px;"
+                                onblur="calculateTotal()"></td>
+                        <td class="text-right"><input class="editable text-right rate" value="120.00"
+                                style="width: 100px;" onblur="calculateTotal()"></td>
+                        <td class="text-right amount">$1,800.00</td>
+                        <td class="text-right"><button onclick="removeItem(this)" class="remove-btn">×</button></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div><input class="editable" value="Code Review & Optimization" onblur="calculateTotal()">
+                            </div>
+                            <div class="desc"><input class="editable" value="Performance improvements & best practices">
+                            </div>
+                        </td>
+                        <td class="text-right"><input class="editable text-right qty" value="8" style="width: 60px;"
+                                onblur="calculateTotal()"></td>
+                        <td class="text-right"><input class="editable text-right rate" value="120.00"
+                                style="width: 100px;" onblur="calculateTotal()"></td>
+                        <td class="text-right amount">$960.00</td>
+                        <td class="text-right"><button onclick="removeItem(this)" class="remove-btn">×</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="totals">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">$7,560.00</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax (<input class="editable" id="taxRate" value="0" style="width: 30px;"
+                            onblur="calculateTotal()">%)</span>
+                    <span id="tax">$0.00</span>
+                </div>
+                <div class="total-row final">
+                    <span>TOTAL</span>
+                    <span id="total">$7,560.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="payment-info">
+                <div class="payment-label">PAYMENT DETAILS</div>
+                <div id="paymentDetails">
+                    <div class="payment-detail">
+                        <input class="editable" value="Bank" style="width: 100px;">:
+                        <input class="editable" value="Your Bank Name">
+                        <button onclick="this.parentElement.remove()" class="remove-btn"
+                            style="margin-left: 10px; width: 20px; height: 20px; font-size: 14px;">×</button>
+                    </div>
+                    <div class="payment-detail">
+                        <input class="editable" value="Account" style="width: 100px;">:
+                        <input class="editable" value="1234567890">
+                        <button onclick="this.parentElement.remove()" class="remove-btn"
+                            style="margin-left: 10px; width: 20px; height: 20px; font-size: 14px;">×</button>
+                    </div>
+                    <div class="payment-detail">
+                        <input class="editable" value="SWIFT" style="width: 100px;">:
+                        <input class="editable" value="BANKCODE123">
+                        <button onclick="this.parentElement.remove()" class="remove-btn"
+                            style="margin-left: 10px; width: 20px; height: 20px; font-size: 14px;">×</button>
+                    </div>
+                </div>
+                <button onclick="addPaymentDetail()" class="btn" style="margin-top: 10px;">+ ADD DETAIL</button>
+            </div>
+            <div class="notes">
+                <input class="editable" id="notes" value="Payment due within 30 days. Thank you for your business!"
+                    style="width: 100%;">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function addItem() {
+            const tbody = document.getElementById('itemsTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <div><input class="editable" value="New Item" onblur="calculateTotal()"></div>
+                    <div class="desc"><input class="editable" value="Description"></div>
+                </td>
+                <td class="text-right"><input class="editable text-right qty" value="1" style="width: 60px;" onblur="calculateTotal()"></td>
+                <td class="text-right"><input class="editable text-right rate" value="0.00" style="width: 100px;" onblur="calculateTotal()"></td>
+                <td class="text-right amount">$0.00</td>
+                <td class="text-right"><button onclick="removeItem(this)" class="remove-btn">×</button></td>
+            `;
+            tbody.appendChild(newRow);
+            calculateTotal();
+        }
+
+        function removeItem(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            calculateTotal();
+        }
+
+        function addPaymentDetail() {
+            const container = document.getElementById('paymentDetails');
+            const newDetail = document.createElement('div');
+            newDetail.className = 'payment-detail';
+            newDetail.innerHTML = `
+                <input class="editable" value="Label" style="width: 100px;">: 
+                <input class="editable" value="Value">
+                <button onclick="this.parentElement.remove()" class="remove-btn" style="margin-left: 10px; width: 20px; height: 20px; font-size: 14px;">×</button>
+            `;
+            container.appendChild(newDetail);
+        }
+
+        function calculateTotal() {
+            const rows = document.querySelectorAll('#itemsTableBody tr');
+            let subtotal = 0;
+
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty').value) || 0;
+                const rate = parseFloat(row.querySelector('.rate').value) || 0;
+                const amount = qty * rate;
+                row.querySelector('.amount').textContent = '$' + amount.toFixed(2);
+                subtotal += amount;
+            });
+
+            const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+            const tax = subtotal * (taxRate / 100);
+            const total = subtotal + tax;
+
+            document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('tax').textContent = '$' + tax.toFixed(2);
+            document.getElementById('total').textContent = '$' + total.toFixed(2);
+        }
+
+        function saveInvoice() {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice_' + document.getElementById('invoiceNum').value + '.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('Invoice saved! You can open this file later to continue editing.');
+        }
+
+        function downloadPDF() {
+            const element = document.querySelector('.container');
+            const buttons = document.querySelectorAll('.btn, .remove-btn, .action-buttons');
+
+            // Hide buttons temporarily
+            buttons.forEach(btn => btn.style.display = 'none');
+
+            const opt = {
+                margin: 10,
+                filename: 'invoice_' + document.getElementById('invoiceNum').value + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Show buttons again
+                buttons.forEach(btn => btn.style.display = '');
+            });
+        }
+    </script>
+</body>
+
+</html>
